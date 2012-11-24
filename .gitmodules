@@ -1,0 +1,3 @@
+[submodule "Libraries/CocoaHTTPServer"]
+	path = Libraries/CocoaHTTPServer
+	url = git://github.com/robbiehanson/CocoaHTTPServer.git
