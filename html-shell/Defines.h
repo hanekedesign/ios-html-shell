@@ -6,9 +6,13 @@
 //  Copyright (c) 2012 Haneke Design. All rights reserved.
 //
 
-#ifndef html_shell_Defines_h
-#define html_shell_Defines_h
-
-
-
+#if TARGET_IPHONE_SIMULATOR
+#define BASE_URL	@"http://localhost"
+#define	HTTP_PORT	8080
+#else
+#define BASE_URL	@"http://localhost"
+#define	HTTP_PORT	80
 #endif
+
+#define	PREF_LONGPRESS_TO_RELOAD	@"HTMLShell_LongPressToReload"
+#define PREF_SCALES_PAGES_TO_FIT	@"HTMLShell_ScalesPagesToFit"

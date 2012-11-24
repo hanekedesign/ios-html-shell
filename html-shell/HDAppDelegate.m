@@ -8,49 +8,135 @@
 
 #import "HDAppDelegate.h"
 
+//
+#import "DDLog.h"
+#import "DDTTYLogger.h"
+#import "HTTPServer.h"
+
+// View Controllers
 #import "HDViewController.h"
 
-@implementation HDAppDelegate
+#if DEBUG
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+#else
+static const int ddLogLevel = LOG_LEVEL_OFF;
+#endif
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+@interface HDAppDelegate ()
+- (void)loadDefaultSettings;
+@property (nonatomic, strong) HTTPServer* httpServer;
+- (void)startHTTPServer;
+- (void)stopHTTPServer;
+@end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+@implementation HDAppDelegate
+@synthesize httpServer=_httpServer;
+
+- (BOOL)application: (UIApplication*)application didFinishLaunchingWithOptions: (NSDictionary*)launchOptions
 {
-    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    // Override point for customization after application launch.
-	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-	    self.viewController = [[HDViewController alloc] initWithNibName:@"HDViewController_iPhone" bundle:nil];
-	} else {
-	    self.viewController = [[HDViewController alloc] initWithNibName:@"HDViewController_iPad" bundle:nil];
-	}
-	self.window.rootViewController = self.viewController;
+#if DEBUG
+	[DDLog addLogger: [DDTTYLogger sharedInstance]];
+#endif
+	[self loadDefaultSettings];
+	[self startHTTPServer];
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////
+    self.window = [[UIWindow alloc] initWithFrame: [[UIScreen mainScreen] bounds]];
+
+    if ( [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone )
+    {
+        self.viewController = [[HDViewController alloc] initWithNibName: @"HDViewController_iPhone" bundle: nil];
+    }
+    else
+    {
+        self.viewController = [[HDViewController alloc] initWithNibName: @"HDViewController_iPad" bundle: nil];
+    }
+    self.window.rootViewController = self.viewController;
     [self.window makeKeyAndVisible];
+	
     return YES;
 }
 
-- (void)applicationWillResignActive:(UIApplication *)application
+- (void)applicationWillResignActive: (UIApplication*)application
 {
-	// Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-	// Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
 }
 
-- (void)applicationDidEnterBackground:(UIApplication *)application
+- (void)applicationDidEnterBackground: (UIApplication*)application
 {
-	// Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
-	// If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+	[self stopHTTPServer];
 }
 
-- (void)applicationWillEnterForeground:(UIApplication *)application
+- (void)applicationWillEnterForeground: (UIApplication*)application
 {
-	// Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+
 }
 
-- (void)applicationDidBecomeActive:(UIApplication *)application
+- (void)applicationDidBecomeActive: (UIApplication*)application
 {
-	// Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+	[self startHTTPServer];
 }
 
-- (void)applicationWillTerminate:(UIApplication *)application
+- (void)applicationWillTerminate: (UIApplication*)application
 {
-	// Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+	[self stopHTTPServer];
+}
+
+#pragma mark -
+#pragma mark Private
+- (void)loadDefaultSettings
+{
+	NSString* defaultsFilePath = [[NSBundle mainBundle] pathForResource: @"Settings"
+                                                                 ofType: @"plist"];
+	NSDictionary* defaultsDict = [NSDictionary dictionaryWithContentsOfFile: defaultsFilePath];
+	
+	if ( defaultsDict )
+		[[NSUserDefaults standardUserDefaults] registerDefaults: defaultsDict];
+}
+
+#pragma mark -
+- (HTTPServer*)httpServer
+{
+	if ( _httpServer == nil )
+	{
+		NSString* documentRoot = [[[NSBundle mainBundle] resourcePath]
+								  stringByAppendingPathComponent: @"webRoot"];
+		
+		// Create server.
+		_httpServer = [[HTTPServer alloc] init];
+		_httpServer.documentRoot = documentRoot;
+		_httpServer.port = HTTP_PORT;
+	}
+	
+	return _httpServer;
+}
+
+- (void)startHTTPServer
+{
+	if ( !self.httpServer.isRunning )
+	{
+		NSError* error = nil;
+		
+		if ( ![self.httpServer start: &error] )
+		{
+			UIAlertView* errorAlertView = [[UIAlertView alloc]
+										   initWithTitle: NSLocalizedString(@"Error", @"")
+										   message: NSLocalizedString(@"There was a problem starting the server.", @"")
+										   delegate: nil
+										   cancelButtonTitle: NSLocalizedString(@"OK", @"")
+										   otherButtonTitles: nil];
+			[errorAlertView show];
+		}
+		else
+		{
+			
+		}
+	}
+}
+
+- (void)stopHTTPServer
+{
+	[self.httpServer stop];
 }
 
 @end

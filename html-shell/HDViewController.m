@@ -9,21 +9,57 @@
 #import "HDViewController.h"
 
 @interface HDViewController ()
-
+@property (nonatomic, readonly) NSUserDefaults* prefs;
+@property (nonatomic, readonly) BOOL longPressToReload;
+@property (nonatomic, readonly) BOOL scalesPagesToFit;
 @end
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 @implementation HDViewController
+@synthesize webView=_webView;
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
+	
+	if ( self.longPressToReload )
+	{
+		UIGestureRecognizer* longPressRecognizer = [[UILongPressGestureRecognizer alloc]
+													initWithTarget: self.webView
+													action: @selector(reload)];
+		[self.webView addGestureRecognizer: longPressRecognizer];
+	}
+	self.webView.scalesPageToFit = self.scalesPagesToFit;
+	
+	NSString* urlString = [NSString stringWithFormat: @"%@:%d", BASE_URL, HTTP_PORT];
+	NSURL* url = [NSURL URLWithString: urlString];
+	NSURLRequest* urlRequest = [NSURLRequest requestWithURL: url];
+	[self.webView loadRequest: urlRequest];
 }
 
-- (void)didReceiveMemoryWarning
+#pragma mark -
+#pragma mark Private
+- (NSUserDefaults*)prefs
 {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+	return [NSUserDefaults standardUserDefaults];
+}
+
+- (BOOL)longPressToReload
+{
+	BOOL longPressToReload = NO;
+	
+	longPressToReload = [[self.prefs objectForKey: PREF_LONGPRESS_TO_RELOAD] boolValue];
+	
+	return longPressToReload;
+}
+
+- (BOOL)scalesPagesToFit
+{
+	BOOL scalesPagesToFit = NO;
+	
+	scalesPagesToFit = [[self.prefs objectForKey: PREF_SCALES_PAGES_TO_FIT] boolValue];
+	
+	return scalesPagesToFit;
 }
 
 @end
