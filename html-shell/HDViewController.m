@@ -12,6 +12,7 @@
 @property (nonatomic, readonly) NSUserDefaults* prefs;
 @property (nonatomic, readonly) BOOL longPressToReload;
 @property (nonatomic, readonly) BOOL scalesPagesToFit;
+@property (nonatomic, readonly) BOOL webViewBounces;
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,6 +31,7 @@
 		[self.webView addGestureRecognizer: longPressRecognizer];
 	}
 	self.webView.scalesPageToFit = self.scalesPagesToFit;
+    self.webView.scrollView.bounces = self.webViewBounces;
 	
 	NSString* urlString = [NSString stringWithFormat: @"%@:%d", BASE_URL, HTTP_PORT];
 	NSURL* url = [NSURL URLWithString: urlString];
@@ -60,6 +62,15 @@
 	scalesPagesToFit = [[self.prefs objectForKey: PREF_SCALES_PAGES_TO_FIT] boolValue];
 	
 	return scalesPagesToFit;
+}
+
+- (BOOL)webViewBounces
+{
+    BOOL webViewBounces = NO;
+    
+    webViewBounces = [[self.prefs objectForKey: PREF_WEBVIEW_BOUNCES] boolValue];
+    
+    return webViewBounces;
 }
 
 @end

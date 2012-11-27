@@ -16,3 +16,4 @@
 
 #define	PREF_LONGPRESS_TO_RELOAD	@"HTMLShell_LongPressToReload"
 #define PREF_SCALES_PAGES_TO_FIT	@"HTMLShell_ScalesPagesToFit"
+#define PREF_WEBVIEW_BOUNCES        @"HTMLShell_WebViewBounces"

@@ -5,6 +5,8 @@
 	<key>HTMLShell_LongPressToReload</key>
 	<false/>
 	<key>HTMLShell_ScalesPagesToFit</key>
+	<true/>
+	<key>HTMLShell_WebViewBounces</key>
 	<false/>
 </dict>
 </plist>
